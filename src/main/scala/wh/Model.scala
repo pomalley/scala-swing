@@ -25,6 +25,9 @@ class Point(var x: Double, var y: Double) {
   def distanceSquared(other: Point): Double = {
     pow(other.x - x, 2) + pow(other.y - y, 2)
   }
+  override def toString: String = {
+    f"$x%.1f, $y%.1f"
+  }
 }
 
 class Army {

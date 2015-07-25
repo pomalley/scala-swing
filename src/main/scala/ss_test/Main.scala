@@ -65,12 +65,10 @@ object Main extends SimpleSwingApplication {
       case ButtonClicked(component) if component == button =>
       case MouseClicked(_, point, _, _, _) =>
       case MouseMoved(source, point, modifiers) =>
-        statusBar.text = canvas.modelUnder(point).map(_.modelType.name).getOrElse(s"${point.x},${point.y}")
+        statusBar.text = canvas.modelUnder(point).map(_.modelType.name).getOrElse(canvas.pixelsToBoard(point).toString)
     }
   }
 }
-
-case class Dart(x: Int, y: Int, color: java.awt.Color)
 
 
 class Canvas(val main: Main.type) extends Panel {
