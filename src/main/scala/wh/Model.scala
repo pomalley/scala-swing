@@ -13,6 +13,7 @@ class Model (val modelType: ModelType, var loc: Point) {
   def overlaps(other: Model): Boolean = {
     loc.distanceSquared(other.loc) <= pow((modelType.size + other.modelType.size)/2, 2)
   }
+  override def toString = s"${modelType.name} at ${loc.toString}"
 }
 
 class ModelType(val name: String, val size: Double, val move: Double, val color: Color) {
@@ -25,13 +26,18 @@ class Point(var x: Double, var y: Double) {
   def distanceSquared(other: Point): Double = {
     pow(other.x - x, 2) + pow(other.y - y, 2)
   }
+  def +(that: Point): Point = new Point(x + that.x, y + that.y)
+  def -(that: Point): Point = this + -that
+  def unary_-(): Point = new Point(-x, -y)
+
   override def toString: String = {
     f"$x%.1f, $y%.1f"
   }
 }
 
 class Army {
-  var models: List[Model] = List[Model]()
+  var squads: List[Squad] = List()
+  def models: List[Model] = squads.foldLeft(List[Model]())((list, squad) => list ++ squad.models)
 }
 
 object Library {
@@ -41,11 +47,18 @@ object Library {
   )
 
   def defaultArmy: Army = {
+    val squadA = new Squad(types("A"))
+    val squadB = new Squad(types("B"))
+    squadA.add(new Model(types("A"), new Point(4, 4)))
+    squadA.add(new Model(types("A"), new Point(4, 7)))
+    squadA.add(new Model(types("A"), new Point(6, 4)))
+    squadA.add(new Model(types("A"), new Point(7, 5)))
+
+    squadB.add(new Model(types("B"), new Point(10, 10)))
+    squadB.add(new Model(types("B"), new Point(10, 12)))
+
     new Army {
-      models = List(
-        types("A").makeModel(new Point(1, 1)),
-        types("B").makeModel(new Point(3, 5))
-      )
+      squads = List(squadA, squadB)
     }
   }
 }

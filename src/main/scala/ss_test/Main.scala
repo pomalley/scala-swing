@@ -1,8 +1,7 @@
 package ss_test
 
-import java.awt.{Color, Graphics2D}
-
-import wh.{Model, Library, Army, Point => BPoint}
+import controller.{MoveSquad, StateManager}
+import wh.{Army, Library}
 
 import scala.swing.BorderPanel.Position._
 import scala.swing._
@@ -55,6 +54,9 @@ object Main extends SimpleSwingApplication {
       }
     }
 
+    val stateManager = new StateManager(canvas)
+    stateManager.pushState(new MoveSquad(stateManager, army.squads.head))
+
     // specify which Components produce events of interest
     listenTo(button)
     listenTo(canvas.mouse.clicks)
@@ -64,6 +66,10 @@ object Main extends SimpleSwingApplication {
     reactions += {
       case ButtonClicked(component) if component == button =>
       case MouseClicked(_, point, _, _, _) =>
+        canvas.pointOrModel(point) match {
+          case Left(boardPoint) => stateManager.pointSelected(boardPoint)
+          case Right(model) => stateManager.modelSelected(model)
+        }
       case MouseMoved(source, point, modifiers) =>
         statusBar.text = canvas.modelUnder(point).map(_.modelType.name).getOrElse(canvas.pixelsToBoard(point).toString)
     }
@@ -71,28 +77,3 @@ object Main extends SimpleSwingApplication {
 }
 
 
-class Canvas(val main: Main.type) extends Panel {
-
-  val ppi: Double = 40  // pixels per inch
-  val bColor = new Color(20, 100, 20)
-
-  override def paintComponent(g: Graphics2D) {
-
-    // Start by erasing this Canvas
-    g.setBackground(bColor)
-    g.clearRect(0, 0, size.width, size.height)
-
-    main.army.models.foreach { m =>
-      val radius: Int = (m.modelType.size * ppi / 2.0).toInt
-      g.setColor(m.modelType.color)
-      g.fillOval((m.loc.x * ppi).toInt - radius, (m.loc.y * ppi).toInt - radius, radius*2, radius*2)
-    }
-  }
-
-  def pixelsToBoard(point: Point): BPoint = new BPoint(point.x.toDouble / ppi, point.y.toDouble / ppi)
-
-  def modelUnder(point: Point): Option[Model] = {
-    val bp = pixelsToBoard(point)
-    main.army.models.find(_.within(bp))
-  }
-}

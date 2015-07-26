@@ -10,8 +10,12 @@ class Squad(val modelType: ModelType) {
   def matches(other: Model): Boolean = matches(other.modelType)
   def matches(other: Squad): Boolean = matches(other.modelType)
 
+  def contains(model: Model): Boolean = models.contains(model)
+
   def add(model: Model): Unit = {
     require(matches(model))
     models ::= model
   }
+
+  def name = s"Unit of ${models.length} ${modelType.name}}"
 }
