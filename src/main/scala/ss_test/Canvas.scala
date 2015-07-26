@@ -1,5 +1,7 @@
 package ss_test
 
+import controller.Effect
+
 import scala.swing.{Point, Graphics2D, Color, Panel}
 
 import wh.{Point => BPoint, Model}
@@ -10,6 +12,7 @@ class Canvas(val main: Main.type) extends Panel {
 
   val ppi: Double = 40  // pixels per inch
   val bColor = new Color(20, 100, 20)
+  var effects: List[Effect] = List()
 
   override def paintComponent(g: Graphics2D) {
 
@@ -21,6 +24,10 @@ class Canvas(val main: Main.type) extends Panel {
       val radius: Int = (m.modelType.size * ppi / 2.0).toInt
       g.setColor(m.modelType.color)
       g.fillOval((m.loc.x * ppi).toInt - radius, (m.loc.y * ppi).toInt - radius, radius*2, radius*2)
+    }
+
+    effects.foreach { effect =>
+      effect.paint(g, this)
     }
   }
 

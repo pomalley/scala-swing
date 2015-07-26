@@ -1,6 +1,6 @@
 package ss_test
 
-import controller.{MoveSquad, StateManager}
+import controller.{ModelMouseover, MoveSquad, StateManager}
 import wh.{Army, Library}
 
 import scala.swing.BorderPanel.Position._
@@ -62,6 +62,8 @@ object Main extends SimpleSwingApplication {
     listenTo(canvas.mouse.clicks)
     listenTo(canvas.mouse.moves)
 
+    var lastMouseoverEffect: ModelMouseover = _
+
     // react to events
     reactions += {
       case ButtonClicked(component) if component == button =>
@@ -71,7 +73,21 @@ object Main extends SimpleSwingApplication {
           case Right(model) => stateManager.modelSelected(model)
         }
       case MouseMoved(source, point, modifiers) =>
-        statusBar.text = canvas.modelUnder(point).map(_.modelType.name).getOrElse(canvas.pixelsToBoard(point).toString)
+        canvas.modelUnder(point) match {
+          case Some(model) =>
+            if (lastMouseoverEffect == null || model != lastMouseoverEffect.model) {
+              lastMouseoverEffect = stateManager.addEffect(new ModelMouseover(model))
+              statusBar.text = model.toString
+              canvas.repaint()
+            }
+          case None =>
+            if (lastMouseoverEffect != null) {
+              stateManager.removeEffect(lastMouseoverEffect)
+              canvas.repaint()
+              lastMouseoverEffect = null
+            }
+            statusBar.text = canvas.pixelsToBoard(point).toString
+        }
     }
   }
 }

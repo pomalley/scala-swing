@@ -32,6 +32,14 @@ class StateManager(val canvas: Canvas) {
   def pointSelected(point: Point): Unit = currentState.pointSelected(point)
   def doneClicked(): Unit = currentState.doneClicked()
   def undoClicked(): Unit = currentState.undoClicked()
+
+  def addEffect[T <: Effect](effect: T): T = {
+    canvas.effects ::= effect
+    effect
+  }
+  def removeEffect(effect: Effect): Unit = {
+    canvas.effects = canvas.effects.filterNot(_ == effect)
+  }
 }
 
 trait InputProcessor {
@@ -72,12 +80,15 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
   override def modelSelected(model: Model) = {
     if (squad contains model) {
       if (!madeMove) {
+        val effect = manager.addEffect(new ModelSelection(model))
+        manager.repaint()
         manager.pushState(new GetLocationFrom(manager, model)).onSuccess {
           case point =>
             val diff = point - model.loc
             squad.models.foreach { m =>
               m.loc += diff
             }
+            manager.removeEffect(effect)
             manager.repaint()
             madeMove = true
         }
