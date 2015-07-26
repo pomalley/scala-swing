@@ -1,6 +1,8 @@
 package ss_test
 
-import controller.{ModelMouseover, MoveSquad, StateManager}
+import controller.StateManager
+import controller.effects.ModelMouseover
+import controller.states.MoveSquad
 import wh.{Army, Library}
 
 import scala.swing.BorderPanel.Position._
@@ -10,6 +12,7 @@ import scala.swing.event._
 object Main extends SimpleSwingApplication {
 
   val army: Army = Library.defaultArmy
+  var statusBar: TextField = _
 
   val ugly = this
 
@@ -29,7 +32,7 @@ object Main extends SimpleSwingApplication {
       enabled = true
       tooltip = "Click to throw a dart"
     }
-    val statusBar = new TextField {
+    ugly.statusBar = new TextField {
       columns = 10
       text = "Click on the target!"
     }
@@ -54,7 +57,7 @@ object Main extends SimpleSwingApplication {
       }
     }
 
-    val stateManager = new StateManager(canvas)
+    val stateManager = new StateManager(canvas, ugly)
     stateManager.pushState(new MoveSquad(stateManager, army.squads.head))
 
     // specify which Components produce events of interest
@@ -73,21 +76,21 @@ object Main extends SimpleSwingApplication {
           case Right(model) => stateManager.modelSelected(model)
         }
       case MouseMoved(source, point, modifiers) =>
-        canvas.modelUnder(point) match {
-          case Some(model) =>
-            if (lastMouseoverEffect == null || model != lastMouseoverEffect.model) {
-              lastMouseoverEffect = stateManager.addEffect(new ModelMouseover(model))
-              statusBar.text = model.toString
-              canvas.repaint()
-            }
-          case None =>
-            if (lastMouseoverEffect != null) {
-              stateManager.removeEffect(lastMouseoverEffect)
-              canvas.repaint()
-              lastMouseoverEffect = null
-            }
-            statusBar.text = canvas.pixelsToBoard(point).toString
-        }
+//        canvas.modelUnder(point) match {
+//          case Some(model) =>
+//            if (lastMouseoverEffect == null || model != lastMouseoverEffect.model) {
+//              lastMouseoverEffect = stateManager.addEffect(new ModelMouseover(model))
+//              statusBar.text = model.toString
+//              canvas.repaint()
+//            }
+//          case None =>
+//            if (lastMouseoverEffect != null) {
+//              stateManager.removeEffect(lastMouseoverEffect)
+//              canvas.repaint()
+//              lastMouseoverEffect = null
+//            }
+//            statusBar.text = canvas.pixelsToBoard(point).toString
+//        }
     }
   }
 }

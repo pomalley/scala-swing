@@ -1,6 +1,6 @@
 package ss_test
 
-import controller.Effect
+import controller.effects.Effect
 
 import scala.swing.{Point, Graphics2D, Color, Panel}
 

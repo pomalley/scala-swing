@@ -1,4 +1,4 @@
-package controller
+package controller.effects
 
 import java.awt.Graphics2D
 

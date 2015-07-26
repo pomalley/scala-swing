@@ -9,6 +9,7 @@ import scala.math.pow
  * A single model.
  */
 class Model (val modelType: ModelType, var loc: Point) {
+
   def within(p: Point): Boolean = loc.distanceSquared(p) <= pow(modelType.size/2, 2)
   def overlaps(other: Model): Boolean = {
     loc.distanceSquared(other.loc) <= pow((modelType.size + other.modelType.size)/2, 2)
@@ -47,8 +48,8 @@ object Library {
   )
 
   def defaultArmy: Army = {
-    val squadA = new Squad(types("A"))
-    val squadB = new Squad(types("B"))
+    val squadA = new Squad(types("A"), "A Squad")
+    val squadB = new Squad(types("B"), "1st B")
     squadA.add(new Model(types("A"), new Point(4, 4)))
     squadA.add(new Model(types("A"), new Point(4, 7)))
     squadA.add(new Model(types("A"), new Point(6, 4)))

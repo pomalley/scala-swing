@@ -3,7 +3,7 @@ package wh
 /**
  * A collection of models into a unit.
  */
-class Squad(val modelType: ModelType) {
+class Squad(val modelType: ModelType, val name: String) {
   var models: List[Model] = List()
 
   def matches(other: ModelType): Boolean = modelType == other
@@ -16,6 +16,4 @@ class Squad(val modelType: ModelType) {
     require(matches(model))
     models ::= model
   }
-
-  def name = s"Unit of ${models.length} ${modelType.name}}"
 }
