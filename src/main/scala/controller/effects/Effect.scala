@@ -3,7 +3,7 @@ package controller.effects
 import java.awt.Graphics2D
 
 import ss_test.Canvas
-import wh.Model
+import wh.{Point, Model}
 
 import scala.swing.Color
 
@@ -44,5 +44,15 @@ class ModelMouseover (val model: Model) extends ModelEffect(model) with Mouseove
     g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.4f))
     val radius: Int = (model.modelType.size * canvas.ppi / 2.0*1.1).toInt
     g.fillOval((model.loc.x * canvas.ppi).toInt - radius, (model.loc.y * canvas.ppi).toInt - radius, radius*2, radius*2)
+  }
+}
+
+class MovementLine (override val model: Model, val loc: Point) extends ModelMouseover(model) {
+  override def paint(g: Graphics2D, canvas: Canvas): Unit = {
+    val ppi = canvas.ppi
+    g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.4f))
+    val radius = (model.modelType.size * ppi / 2.0).toInt
+    g.fillOval((loc.x*ppi).toInt - radius, (loc.y*ppi).toInt - radius, radius*2, radius*2)
+    g.drawLine((model.loc.x*ppi).toInt, (model.loc.y*ppi).toInt, (loc.x*ppi).toInt, (loc.y*ppi).toInt)
   }
 }

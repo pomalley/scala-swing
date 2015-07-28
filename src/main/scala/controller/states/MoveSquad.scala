@@ -1,7 +1,7 @@
 package controller.states
 
 import controller.StateManager
-import controller.effects.{ModelMouseover, ModelSelection}
+import controller.effects.{MovementLine, ModelMouseover, ModelSelection}
 import wh.{Model, Point, Squad}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +34,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
     if (squad contains model) {
       if (!madeMove) {
         val effect = manager.addEffect(new ModelSelection(model))
-        manager.pushState(new GetLocationFrom(manager, model)).onComplete {
+        manager.pushState(new GetMoveFor(manager, model)).onComplete {
           case Success(opt) =>
             opt match {
               case Some(point) =>
@@ -69,38 +69,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
   }
 }
 
-class GetLocation(override val manager: StateManager) extends State[Option[Point]](manager) {
-  var lastMouseover: Model = null
-
-  override def onActivate(): Unit = {
-    manager.statusText = "Choose location"
-  }
-
-  override def modelSelected(model: Model): Unit = {
-    // TODO: choose a point near this model
-  }
-  override def squadSelected(squad: Squad): Unit = {}
-
-  override def pointSelected(point: Point) = {
-    promise.success(Some(point))
-  }
-
-  override def undoClicked(): Unit = {}
-
-  override def doneClicked(): Unit = {}
-
-  override def mouseMove(point: Point, model: Option[Model]): Unit = {
-    if (model.nonEmpty && model.get != lastMouseover) {
-      manager.addEffect(new ModelMouseover(model.get))
-      lastMouseover = model.get
-    } else if (model.isEmpty && lastMouseover != null) {
-      manager.removeMouseover()
-      lastMouseover = null
-    }
-  }
-}
-
-class GetLocationFrom(override val manager: StateManager, model: Model) extends GetLocation(manager) {
+class GetMoveFor(override val manager: StateManager, model: Model) extends State[Option[Point]](manager) {
   override def onActivate(): Unit = {
     manager.statusText = s"Move ${model.toString}"
   }
@@ -113,5 +82,13 @@ class GetLocationFrom(override val manager: StateManager, model: Model) extends 
   }
   override def undoClicked(): Unit = {
     promise.success(None)
+  }
+
+  override def squadSelected(squad: Squad): Unit = {}
+
+  override def modelSelected(model: Model): Unit = {}
+
+  override def mouseMove(point: Point, mouseoverModel: Option[Model]): Unit = {
+    manager.addEffect(new MovementLine(model, point))
   }
 }
