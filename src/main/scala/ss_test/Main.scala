@@ -74,21 +74,7 @@ object Main extends SimpleSwingApplication {
           case Right(model) => stateManager.modelSelected(model)
         }
       case MouseMoved(source, point, modifiers) =>
-        canvas.modelUnder(point) match {
-          case Some(model) =>
-            if (lastMouseoverEffect.map(_.source != model).getOrElse(true)) {
-              lastMouseoverEffect.foreach(stateManager.removeEffect(_))
-              lastMouseoverEffect = stateManager.modelMouseover(model)
-              lastMouseoverEffect.foreach(stateManager.addEffect)
-              canvas.repaint()
-            }
-          case None =>
-            if (lastMouseoverEffect.nonEmpty) {
-              lastMouseoverEffect.foreach(stateManager.removeEffect(_))
-              canvas.repaint()
-              lastMouseoverEffect = None
-            }
-        }
+        stateManager.mouseMove(canvas.pixelsToBoard(point), canvas.modelUnder(point))
     }
   }
 }

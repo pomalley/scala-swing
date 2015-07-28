@@ -1,7 +1,6 @@
 package controller.states
 
 import controller.StateManager
-import controller.effects.MouseoverEffect
 import wh.{Model, Point, Squad}
 
 import scala.concurrent.Promise
@@ -30,13 +29,11 @@ trait InputProcessor {
   def pointSelected(point: Point): Unit
 
   /**
-   * Called when user mouses over a model.
-   * This must return the effect so the controller can remove the effect when the mouseover is done.
-   * The state manager actually adds the effect, do not do so in this function.
-   * @param model the model
-   * @return the effect
+   * Called for each mouse move.
+   * @param point the location of the mouse
+   * @param model the model the mouse is over, if any
    */
-  def modelMouseover(model: Model): Option[MouseoverEffect]
+  def mouseMove(point: Point, model: Option[Model]): Unit
   def doneClicked(): Unit
   def undoClicked(): Unit
 

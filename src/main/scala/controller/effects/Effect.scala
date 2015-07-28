@@ -22,6 +22,7 @@ trait Effect {
 
 trait MouseoverEffect extends Effect {
   val source: Any
+  override val effectClass = Mouseover
 }
 
 abstract class ModelEffect(val mode: Model) extends Effect
@@ -38,7 +39,6 @@ class ModelSelection (val model: Model) extends ModelEffect(model) {
 
 class ModelMouseover (val model: Model) extends ModelEffect(model) with MouseoverEffect {
   override val source = model
-  override val effectClass = Mouseover
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
     g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.4f))

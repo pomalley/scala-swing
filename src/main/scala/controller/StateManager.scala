@@ -1,12 +1,12 @@
 package controller
 
 import controller.effects.{MouseoverEffect, Effect}
-import controller.states.{State, InputProcessor}
+import controller.states.{InputProcessor, State}
 import ss_test.{Canvas, Main}
 import wh.{Model, Point, Squad}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * For controlling the state of the UI.
@@ -14,6 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class StateManager(val canvas: Canvas, val main: Main.type) {
    var stateStack: List[InputProcessor] = List()
    def currentState = stateStack.head
+   var currentMouseover: Option[MouseoverEffect] = None
 
   /**
    * Push a new state onto the stack.
@@ -51,11 +52,18 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    def squadSelected(squad: Squad): Unit = currentState.squadSelected(squad)
    def modelSelected(model: Model): Unit = currentState.modelSelected(model)
    def pointSelected(point: Point): Unit = currentState.pointSelected(point)
-   def modelMouseover(model: Model): Option[MouseoverEffect] = currentState.modelMouseover(model)
+   def mouseMove(point: Point, model: Option[Model]): Unit = currentState.mouseMove(point, model)
    def doneClicked(): Unit = currentState.doneClicked()
    def undoClicked(): Unit = currentState.undoClicked()
 
    def addEffect[T <: Effect](effect: T): T = {
+     // only keep one mouseover at a time
+     effect match {
+       case mouseover: MouseoverEffect =>
+         removeMouseover()
+         currentMouseover = Some(mouseover)
+       case _ =>
+     }
      canvas.effects ::= effect
      canvas.repaint()
      effect
@@ -64,6 +72,13 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
      canvas.effects = canvas.effects.filterNot(_ == effect)
      canvas.repaint()
    }
+   def removeEffects(effects: Seq[Effect]): Unit = {
+     canvas.effects = canvas.effects.filterNot(effects.contains)
+     canvas.repaint()
+   }
+  def removeMouseover(): Unit = {
+     removeEffects(currentMouseover.toList)
+  }
 
    def statusText: String = main.statusBar.text
    def statusText_=(s: String) = main.statusBar.text_=(s)

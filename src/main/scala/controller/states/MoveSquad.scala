@@ -1,11 +1,11 @@
 package controller.states
 
 import controller.StateManager
-import controller.effects.{ModelMouseover, MouseoverEffect, ModelSelection}
-import wh.{Squad, Model, Point}
+import controller.effects.{ModelMouseover, ModelSelection}
+import wh.{Model, Point, Squad}
 
-import scala.math._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.math._
 import scala.util.{Failure, Success}
 
 /**
@@ -23,6 +23,7 @@ import scala.util.{Failure, Success}
  */
 class MoveSquad(override val manager: StateManager, val squad: Squad) extends State[Action](manager) {
   var madeMove = false
+  var lastMouseover: Model = null
 
   override def onActivate(): Unit = {
     manager.statusText = s"Moving ${squad.name}: choose model for initial move"
@@ -50,8 +51,14 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
       }
     }
   }
-  override def modelMouseover(model: Model): Option[MouseoverEffect] = {
-    Some(new ModelMouseover(model))
+  override def mouseMove(point: Point, model: Option[Model]): Unit = {
+    if (model.nonEmpty && model.get != lastMouseover) {
+      manager.addEffect(new ModelMouseover(model.get))
+      lastMouseover = model.get
+    } else if (model.isEmpty && lastMouseover != null) {
+      manager.removeMouseover()
+      lastMouseover = null
+    }
   }
   override def pointSelected(point: Point) = {}
   override def doneClicked() = {
@@ -63,6 +70,8 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
 }
 
 class GetLocation(override val manager: StateManager) extends State[Option[Point]](manager) {
+  var lastMouseover: Model = null
+
   override def onActivate(): Unit = {
     manager.statusText = "Choose location"
   }
@@ -80,8 +89,14 @@ class GetLocation(override val manager: StateManager) extends State[Option[Point
 
   override def doneClicked(): Unit = {}
 
-  override def modelMouseover(model: Model): Option[MouseoverEffect] = {
-    Some(new ModelMouseover(model))
+  override def mouseMove(point: Point, model: Option[Model]): Unit = {
+    if (model.nonEmpty && model.get != lastMouseover) {
+      manager.addEffect(new ModelMouseover(model.get))
+      lastMouseover = model.get
+    } else if (model.isEmpty && lastMouseover != null) {
+      manager.removeMouseover()
+      lastMouseover = null
+    }
   }
 }
 
