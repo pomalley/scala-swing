@@ -1,6 +1,6 @@
 package controller
 
-import controller.effects.Effect
+import controller.effects.{MouseoverEffect, Effect}
 import controller.states.{State, InputProcessor}
 import ss_test.{Canvas, Main}
 import wh.{Model, Point, Squad}
@@ -15,6 +15,12 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    var stateStack: List[InputProcessor] = List()
    def currentState = stateStack.head
 
+  /**
+   * Push a new state onto the stack.
+   * @param state state to push
+   * @tparam Result type that this state will return
+   * @return future for the result of the state
+   */
    def pushState[Result](state: State[Result]): Future[Result] = {
      stateStack ::= state
      state.onActivate()
@@ -45,6 +51,7 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    def squadSelected(squad: Squad): Unit = currentState.squadSelected(squad)
    def modelSelected(model: Model): Unit = currentState.modelSelected(model)
    def pointSelected(point: Point): Unit = currentState.pointSelected(point)
+   def modelMouseover(model: Model): Option[MouseoverEffect] = currentState.modelMouseover(model)
    def doneClicked(): Unit = currentState.doneClicked()
    def undoClicked(): Unit = currentState.undoClicked()
 

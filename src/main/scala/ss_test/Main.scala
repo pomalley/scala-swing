@@ -1,7 +1,7 @@
 package ss_test
 
 import controller.StateManager
-import controller.effects.ModelMouseover
+import controller.effects.MouseoverEffect
 import controller.states.MoveSquad
 import wh.{Army, Library}
 
@@ -26,8 +26,6 @@ object Main extends SimpleSwingApplication {
     }
     val button = new Button {
       text = "Throw!"
-//      foreground = Color.blue
-//      background = Color.red
       borderPainted = true
       enabled = true
       tooltip = "Click to throw a dart"
@@ -65,7 +63,7 @@ object Main extends SimpleSwingApplication {
     listenTo(canvas.mouse.clicks)
     listenTo(canvas.mouse.moves)
 
-    var lastMouseoverEffect: ModelMouseover = _
+    var lastMouseoverEffect: Option[MouseoverEffect] = None
 
     // react to events
     reactions += {
@@ -76,21 +74,21 @@ object Main extends SimpleSwingApplication {
           case Right(model) => stateManager.modelSelected(model)
         }
       case MouseMoved(source, point, modifiers) =>
-//        canvas.modelUnder(point) match {
-//          case Some(model) =>
-//            if (lastMouseoverEffect == null || model != lastMouseoverEffect.model) {
-//              lastMouseoverEffect = stateManager.addEffect(new ModelMouseover(model))
-//              statusBar.text = model.toString
-//              canvas.repaint()
-//            }
-//          case None =>
-//            if (lastMouseoverEffect != null) {
-//              stateManager.removeEffect(lastMouseoverEffect)
-//              canvas.repaint()
-//              lastMouseoverEffect = null
-//            }
-//            statusBar.text = canvas.pixelsToBoard(point).toString
-//        }
+        canvas.modelUnder(point) match {
+          case Some(model) =>
+            if (lastMouseoverEffect.map(_.source != model).getOrElse(true)) {
+              lastMouseoverEffect.foreach(stateManager.removeEffect(_))
+              lastMouseoverEffect = stateManager.modelMouseover(model)
+              lastMouseoverEffect.foreach(stateManager.addEffect)
+              canvas.repaint()
+            }
+          case None =>
+            if (lastMouseoverEffect.nonEmpty) {
+              lastMouseoverEffect.foreach(stateManager.removeEffect(_))
+              canvas.repaint()
+              lastMouseoverEffect = None
+            }
+        }
     }
   }
 }

@@ -1,21 +1,57 @@
 package controller.states
 
 import controller.StateManager
+import controller.effects.MouseoverEffect
 import wh.{Model, Point, Squad}
 
 import scala.concurrent.Promise
 
-
-
+/**
+ * Base trait for States. Represents the lifecycle of a state and what inputs it can react to.
+ * These methods are how the state transforms the UI to accomplish its goal.
+ */
 trait InputProcessor {
+  /**
+   * Called when user selects a squad. Currently unimplemented.
+   * @param squad the squad the user selects
+   */
   def squadSelected(squad: Squad): Unit
+
+  /**
+   * Called when user selects a model.
+   * @param model The model that a user has selected.
+   */
   def modelSelected(model: Model): Unit
+
+  /**
+   * Called when user selects a point.
+   * @param point the point
+   */
   def pointSelected(point: Point): Unit
+
+  /**
+   * Called when user mouses over a model.
+   * This must return the effect so the controller can remove the effect when the mouseover is done.
+   * The state manager actually adds the effect, do not do so in this function.
+   * @param model the model
+   * @return the effect
+   */
+  def modelMouseover(model: Model): Option[MouseoverEffect]
   def doneClicked(): Unit
   def undoClicked(): Unit
+
+  /**
+   * Called when this state is first pushed onto the stack, or when the state
+   * above it is popped off the stack.
+   */
   def onActivate(): Unit
 }
 
+/**
+ * Base class for States. Essentially just the machinery for fulfilling the promise to return a given object.
+ * @param manager StateManager to which we belong
+ * @tparam Result The type of result we promise.
+ */
 abstract class State[Result] (val manager: StateManager) extends InputProcessor {
   val promise = Promise[Result]()
 

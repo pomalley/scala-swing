@@ -1,11 +1,12 @@
 package controller.states
 
 import controller.StateManager
-import controller.effects.ModelSelection
+import controller.effects.{ModelMouseover, MouseoverEffect, ModelSelection}
 import wh.{Squad, Model, Point}
 
 import scala.math._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 /**
  * This state is used to move a squad.
@@ -32,18 +33,25 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
     if (squad contains model) {
       if (!madeMove) {
         val effect = manager.addEffect(new ModelSelection(model))
-        manager.pushState(new GetLocationFrom(manager, model)).onSuccess {
-          case point =>
-            val diff = point - model.loc
-            squad.models.foreach { m =>
-              m.loc += diff
+        manager.pushState(new GetLocationFrom(manager, model)).onComplete {
+          case Success(opt) =>
+            opt match {
+              case Some(point) =>
+                val diff = point - model.loc
+                squad.models.foreach(_.loc += diff)
+                madeMove = true
+                manager.statusText = s"Moving ${squad.name}: choose model to tidy"
+              case None =>
             }
             manager.removeEffect(effect)
-            madeMove = true
-            manager.statusText = s"Moving ${squad.name}: choose model to tidy"
+          case Failure(t) =>
+            manager.removeEffect(effect)
         }
       }
     }
+  }
+  override def modelMouseover(model: Model): Option[MouseoverEffect] = {
+    Some(new ModelMouseover(model))
   }
   override def pointSelected(point: Point) = {}
   override def doneClicked() = {
@@ -54,7 +62,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
   }
 }
 
-class GetLocation(override val manager: StateManager) extends State[Point](manager) {
+class GetLocation(override val manager: StateManager) extends State[Option[Point]](manager) {
   override def onActivate(): Unit = {
     manager.statusText = "Choose location"
   }
@@ -65,13 +73,16 @@ class GetLocation(override val manager: StateManager) extends State[Point](manag
   override def squadSelected(squad: Squad): Unit = {}
 
   override def pointSelected(point: Point) = {
-    promise.success(point)
+    promise.success(Some(point))
   }
 
   override def undoClicked(): Unit = {}
 
   override def doneClicked(): Unit = {}
 
+  override def modelMouseover(model: Model): Option[MouseoverEffect] = {
+    Some(new ModelMouseover(model))
+  }
 }
 
 class GetLocationFrom(override val manager: StateManager, model: Model) extends GetLocation(manager) {
@@ -80,6 +91,12 @@ class GetLocationFrom(override val manager: StateManager, model: Model) extends 
   }
   override def pointSelected(point: Point) = {
     if (model.loc.distanceSquared(point) <= pow(model.modelType.move, 2))
-      promise.success(point)
+      promise.success(Some(point))
+  }
+  override def doneClicked(): Unit = {
+    promise.success(Some(model.loc))
+  }
+  override def undoClicked(): Unit = {
+    promise.success(None)
   }
 }

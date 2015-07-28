@@ -20,6 +20,10 @@ trait Effect {
   def paint(g: Graphics2D, canvas: Canvas): Unit
 }
 
+trait MouseoverEffect extends Effect {
+  val source: Any
+}
+
 abstract class ModelEffect(val mode: Model) extends Effect
 
 class ModelSelection (val model: Model) extends ModelEffect(model) {
@@ -32,7 +36,8 @@ class ModelSelection (val model: Model) extends ModelEffect(model) {
   }
 }
 
-class ModelMouseover (val model: Model) extends ModelEffect(model) {
+class ModelMouseover (val model: Model) extends ModelEffect(model) with MouseoverEffect {
+  override val source = model
   override val effectClass = Mouseover
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
