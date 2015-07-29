@@ -11,9 +11,28 @@ import scala.math.pow
 class Model (val modelType: ModelType, var loc: Point) {
 
   def within(p: Point): Boolean = loc.distanceSquared(p) <= pow(modelType.size/2, 2)
-  def overlaps(other: Model): Boolean = {
-    loc.distanceSquared(other.loc) <= pow((modelType.size + other.modelType.size)/2, 2)
+
+  /**
+   * Whether this model's base overlaps the other one's base.
+   * @param other the other model
+   * @param otherLoc if Some(loc), whether it would overlap if the other were at loc
+   * @return whether it overlaps
+   */
+  def overlaps(other: Model, otherLoc: Option[Point] = None): Boolean = {
+    loc.distanceSquared(otherLoc getOrElse other.loc) <= pow((modelType.size + other.modelType.size)/2, 2)
   }
+
+  /**
+   * Distance between models' bases.
+   * Will need to be rewritten for non-circular bases.
+   * @param other other model
+   * @param otherLoc if Some(loc), whether it would overlap if the other were at loc
+   * @return the distance
+   */
+  def modelDistance(other: Model, otherLoc: Option[Point] = None): Double = {
+    math.sqrt(loc.distanceSquared(otherLoc getOrElse other.loc)) - modelType.size/2.0 - other.modelType.size/2.0
+  }
+
   override def toString = s"${modelType.name} at ${loc.toString}"
 
   var squad: Squad = null

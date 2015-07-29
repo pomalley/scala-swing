@@ -76,7 +76,7 @@ class GetMoveFor(override val manager: StateManager, model: Model) extends State
   }
   override def pointSelected(point: Point) = {
     Rules.validMove(model, point) match {
-      case Some(reason) =>
+      case Some(reason) => println(reason)
       case None => complete(Some(point))
     }
   }

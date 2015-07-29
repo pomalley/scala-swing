@@ -8,19 +8,26 @@ object Rules {
   var armyA: Army = _
   var armyB: Army = _
 
+  val minEnemyMoveDistance = 3.0
+
+  def otherArmy(army: Army): Army = if (army == armyA) armyB else armyA
+
   /**
    * Is the proposed move for this model valid?
    * This is a bit backwards because we return None for success.
-   * @param model model trying to move
+   * @param mover model trying to move
    * @param point proposed location
    * @param original original point--if None, use model's current loc instead
    * @return If valid, None; if invalid, String explaining reason for failure
    */
-  def validMove(model: Model, point: Point, original: Option[Point] = None): Option[String] = {
-    val distSq = point.distanceSquared(original.getOrElse(model.loc))
-    if (distSq > pow(model.modelType.move, 2))
+  def validMove(mover: Model, point: Point, original: Option[Point] = None): Option[String] = {
+    val distSq = point.distanceSquared(original.getOrElse(mover.loc))
+    if (distSq > pow(mover.modelType.move, 2))
       return Some("Cannot move this far.")
-
+    if (mover.squad.army.models.filterNot(mover.squad.contains).filter(_.overlaps(mover, Some(point))).nonEmpty)
+      return Some("Cannot overlap friendly model.")
+    if (otherArmy(mover.squad.army).models.filter(_.modelDistance(mover, Some(point)) < minEnemyMoveDistance).nonEmpty)
+      return Some(s"Cannot be within $minEnemyMoveDistance of an enemy.")
     None
   }
 }
