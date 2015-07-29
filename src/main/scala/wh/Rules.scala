@@ -25,9 +25,9 @@ object Rules {
     val distSq = point.distanceSquared(original.getOrElse(mover.loc))
     if (distSq > pow(mover.modelType.move + moveBonus, 2))
       return Some("Cannot move this far.")
-    if (mover.squad.army.models.filterNot(mover.squad.contains).filter(_.overlaps(mover, Some(point))).nonEmpty)
+    if (mover.squad.army.models.filterNot(mover.squad.contains).exists(_.overlaps(mover, Some(point))))
       return Some("Cannot overlap friendly model.")
-    if (otherArmy(mover.squad.army).models.filter(_.modelDistance(mover, Some(point)) < minEnemyMoveDistance).nonEmpty)
+    if (otherArmy(mover.squad.army).models.exists(_.modelDistance(mover, Some(point)) < minEnemyMoveDistance))
       return Some(s"Cannot be within $minEnemyMoveDistance of an enemy.")
     None
   }
