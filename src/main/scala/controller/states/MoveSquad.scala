@@ -92,7 +92,6 @@ class GetMoveFor(override val manager: StateManager, model: Model) extends State
   override def modelSelected(model: Model): Unit = {}
 
   override def mouseMove(point: Point, mouseoverModel: Option[Model]): Unit = {
-
     Rules.validMove(model, point) match {
       case Some(reason) =>
         manager.statusText = baseMsg + s" -- $reason"

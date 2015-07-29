@@ -18,11 +18,12 @@ object Rules {
    * @param mover model trying to move
    * @param point proposed location
    * @param original original point--if None, use model's current loc instead
+   * @param moveBonus additive bonus to move, e.g. from a run
    * @return If valid, None; if invalid, String explaining reason for failure
    */
-  def validMove(mover: Model, point: Point, original: Option[Point] = None): Option[String] = {
+  def validMove(mover: Model, point: Point, original: Option[Point] = None, moveBonus: Int = 0): Option[String] = {
     val distSq = point.distanceSquared(original.getOrElse(mover.loc))
-    if (distSq > pow(mover.modelType.move, 2))
+    if (distSq > pow(mover.modelType.move + moveBonus, 2))
       return Some("Cannot move this far.")
     if (mover.squad.army.models.filterNot(mover.squad.contains).filter(_.overlaps(mover, Some(point))).nonEmpty)
       return Some("Cannot overlap friendly model.")
