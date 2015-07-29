@@ -15,6 +15,9 @@ class Model (val modelType: ModelType, var loc: Point) {
     loc.distanceSquared(other.loc) <= pow((modelType.size + other.modelType.size)/2, 2)
   }
   override def toString = s"${modelType.name} at ${loc.toString}"
+
+  var squad: Squad = null
+  def sameSquad(other: Model): Boolean = squad != null && squad.models.contains(other)
 }
 
 class ModelType(val name: String, val size: Double, val move: Double, val color: Color) {
@@ -48,8 +51,10 @@ object Library {
   )
 
   def defaultArmy: Army = {
-    val squadA = new Squad(types("A"), "A Squad")
-    val squadB = new Squad(types("B"), "1st B")
+    val army = new Army
+
+    val squadA = new Squad(types("A"), "A Squad", army)
+    val squadB = new Squad(types("B"), "1st B", army)
     squadA.add(new Model(types("A"), new Point(4, 4)))
     squadA.add(new Model(types("A"), new Point(4, 7)))
     squadA.add(new Model(types("A"), new Point(6, 4)))
@@ -58,8 +63,6 @@ object Library {
     squadB.add(new Model(types("B"), new Point(10, 10)))
     squadB.add(new Model(types("B"), new Point(10, 12)))
 
-    new Army {
-      squads = List(squadA, squadB)
-    }
+    army
   }
 }

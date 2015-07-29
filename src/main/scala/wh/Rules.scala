@@ -4,6 +4,7 @@ import scala.math.pow
 
 
 object Rules {
+  // must set these before checking rules
   var armyA: Army = _
   var armyB: Army = _
 
@@ -19,6 +20,7 @@ object Rules {
     val distSq = point.distanceSquared(original.getOrElse(model.loc))
     if (distSq > pow(model.modelType.move, 2))
       return Some("Cannot move this far.")
+
     None
   }
 }
