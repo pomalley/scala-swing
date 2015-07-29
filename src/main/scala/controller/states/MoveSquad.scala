@@ -2,10 +2,9 @@ package controller.states
 
 import controller.StateManager
 import controller.effects.{MovementLine, ModelMouseover, ModelSelection}
-import wh.{Model, Point, Squad}
+import wh.{Model, Point, Rules, Squad}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.math._
 import scala.util.{Failure, Success}
 
 /**
@@ -70,12 +69,16 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
 }
 
 class GetMoveFor(override val manager: StateManager, model: Model) extends State[Option[Point]](manager) {
+  val baseMsg = s"Move this model"
+
   override def onActivate(): Unit = {
-    manager.statusText = s"Move ${model.toString}"
+    manager.statusText = baseMsg
   }
   override def pointSelected(point: Point) = {
-    if (model.loc.distanceSquared(point) <= pow(model.modelType.move, 2))
-      promise.success(Some(point))
+    Rules.validMove(model, point) match {
+      case Some(reason) =>
+      case None => complete(Some(point))
+    }
   }
   override def doneClicked(): Unit = {
     promise.success(Some(model.loc))
@@ -89,6 +92,14 @@ class GetMoveFor(override val manager: StateManager, model: Model) extends State
   override def modelSelected(model: Model): Unit = {}
 
   override def mouseMove(point: Point, mouseoverModel: Option[Model]): Unit = {
-    manager.addEffect(new MovementLine(model, point))
+
+    Rules.validMove(model, point) match {
+      case Some(reason) =>
+        manager.statusText = baseMsg + s" -- $reason"
+        manager.addEffect(new MovementLine(model, point, false))
+      case None =>
+        manager.statusText = baseMsg
+        manager.addEffect(new MovementLine(model, point, true))
+    }
   }
 }

@@ -3,7 +3,7 @@ package ss_test
 import controller.StateManager
 import controller.effects.MouseoverEffect
 import controller.states.MoveSquad
-import wh.{Army, Library}
+import wh.{Rules, Army, Library}
 
 import scala.swing.BorderPanel.Position._
 import scala.swing._
@@ -15,6 +15,9 @@ object Main extends SimpleSwingApplication {
   var statusBar: TextField = _
 
   val ugly = this
+
+  Rules.armyA = army
+  Rules.armyB = new Army()
 
   def top = new MainFrame { // top is a required method
     title = "A Sample Scala Swing GUI"
