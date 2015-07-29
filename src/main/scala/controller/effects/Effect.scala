@@ -47,7 +47,11 @@ class ModelMouseover (val model: Model) extends ModelEffect(model) with Mouseove
   }
 }
 
-class MovementLine (override val model: Model, val loc: Point, val valid: Boolean) extends ModelMouseover(model) {
+class MovementLine (override val model: Model, val loc: Point, val valid: Boolean, val origin: Option[Point] = None)
+  extends ModelMouseover(model) {
+
+  val originLoc = origin.getOrElse(model.loc)
+
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
     val ppi = canvas.ppi
     if (valid)
@@ -56,6 +60,7 @@ class MovementLine (override val model: Model, val loc: Point, val valid: Boolea
       g.setColor(new Color(1.0f, 0.5f, 0.5f, 0.4f))
     val radius = (model.modelType.size * ppi / 2.0).toInt
     g.fillOval((loc.x*ppi).toInt - radius, (loc.y*ppi).toInt - radius, radius*2, radius*2)
-    g.drawLine((model.loc.x*ppi).toInt, (model.loc.y*ppi).toInt, (loc.x*ppi).toInt, (loc.y*ppi).toInt)
+    g.drawLine((originLoc.x*ppi).toInt, (originLoc.y*ppi).toInt, (loc.x*ppi).toInt, (loc.y*ppi).toInt)
   }
+
 }

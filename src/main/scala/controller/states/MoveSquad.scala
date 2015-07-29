@@ -22,6 +22,7 @@ import scala.util.{Failure, Success}
  */
 class MoveSquad(override val manager: StateManager, val squad: Squad) extends State[Action](manager) {
   var madeMove = false
+  val origins = squad.models.map(_.loc)
   var lastMouseover: Model = null
 
   override def onActivate(): Unit = {
@@ -37,9 +38,25 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
           case Success(opt) =>
             opt match {
               case Some(point) =>
-                val diff = point - model.loc
-                squad.models.foreach(_.loc += diff)
+                val moveVector = point - model.loc
+                squad.models.foreach(_.loc += moveVector)
                 madeMove = true
+                manager.statusText = s"Moving ${squad.name}: choose model to tidy"
+              case None =>
+            }
+            manager.removeEffect(effect)
+          case Failure(t) =>
+            manager.removeEffect(effect)
+        }
+      } else {
+        // this is a tidy-up
+        val effect = manager.addEffect(new ModelSelection(model))
+        val origin = origins(squad.models.indexOf(model))
+        manager.pushState(new GetTidyMoveFor(manager, model, Some(origin))).onComplete {
+          case Success(opt) =>
+            opt match {
+              case Some(point) =>
+                model.loc = point
                 manager.statusText = s"Moving ${squad.name}: choose model to tidy"
               case None =>
             }
@@ -68,14 +85,18 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
   }
 }
 
-class GetMoveFor(override val manager: StateManager, model: Model) extends State[Option[Point]](manager) {
+class GetMoveFor(override val manager: StateManager, val model: Model, val origin: Option[Point] = None)
+  extends State[Option[Point]](manager) {
+
   val baseMsg = s"Move this model"
+
+  def moveRule(point: Point): Option[String] = Rules.validMove(model, point, origin)
 
   override def onActivate(): Unit = {
     manager.statusText = baseMsg
   }
   override def pointSelected(point: Point) = {
-    Rules.validMove(model, point) match {
+    moveRule(point) match {
       case Some(reason) => println(reason)
       case None => complete(Some(point))
     }
@@ -92,13 +113,19 @@ class GetMoveFor(override val manager: StateManager, model: Model) extends State
   override def modelSelected(model: Model): Unit = {}
 
   override def mouseMove(point: Point, mouseoverModel: Option[Model]): Unit = {
-    Rules.validMove(model, point) match {
+    moveRule(point) match {
       case Some(reason) =>
         manager.statusText = baseMsg + s" -- $reason"
-        manager.addEffect(new MovementLine(model, point, false))
+        manager.addEffect(new MovementLine(model, point, false, origin))
       case None =>
         manager.statusText = baseMsg
-        manager.addEffect(new MovementLine(model, point, true))
+        manager.addEffect(new MovementLine(model, point, true, origin))
     }
   }
+}
+
+class GetTidyMoveFor(override val manager: StateManager, override val model: Model, override val origin: Option[Point])
+  extends GetMoveFor(manager, model, origin) {
+
+  override def moveRule(point: Point): Option[String] = Rules.validMove(model, point, origin, squadCoherence = true)
 }
