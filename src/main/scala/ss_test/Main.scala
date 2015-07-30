@@ -3,7 +3,7 @@ package ss_test
 import controller.StateManager
 import controller.effects.MouseoverEffect
 import controller.states.MoveSquad
-import wh.{Rules, Army, Library}
+import wh.{Army, Library, Rules}
 
 import scala.swing.BorderPanel.Position._
 import scala.swing._
@@ -24,18 +24,26 @@ object Main extends SimpleSwingApplication {
 
     // declare Components here
     val topLabel = new Label {
-      text = "I'm a big label!"
+      text = "This is the thing."
       font = new Font("Ariel", java.awt.Font.ITALIC, 24)
     }
-    val button = new Button {
-      text = "Throw!"
+    val doneButton = new Button {
+      text = "Done"
       borderPainted = true
       enabled = true
-      tooltip = "Click to throw a dart"
+      //tooltip = "Click to throw a dart"
     }
+    val undoButton = new Button {
+      text = "Undo"
+      borderPainted = true
+      enabled = true
+    }
+    val sideLayout = new BoxPanel(Orientation.Vertical) {
+      contents ++= Seq(doneButton, undoButton)
+    }
+
     ugly.statusBar = new TextField {
       columns = 10
-      text = "Click on the target!"
     }
     val canvas = new Canvas(ugly) {
       preferredSize = new Dimension(100, 100)
@@ -45,7 +53,7 @@ object Main extends SimpleSwingApplication {
     // Components may include other Panels
     contents = new BorderPanel {
       layout(topLabel) = North
-      layout(button) = West
+      layout(sideLayout) = West
       layout(canvas) = Center
       layout(statusBar) = South
     }
@@ -62,7 +70,8 @@ object Main extends SimpleSwingApplication {
     stateManager.pushState(new MoveSquad(stateManager, army.squads.head))
 
     // specify which Components produce events of interest
-    listenTo(button)
+    listenTo(doneButton)
+    listenTo(undoButton)
     listenTo(canvas.mouse.clicks)
     listenTo(canvas.mouse.moves)
 
@@ -70,7 +79,8 @@ object Main extends SimpleSwingApplication {
 
     // react to events
     reactions += {
-      case ButtonClicked(component) if component == button =>
+      case ButtonClicked(component) if component == doneButton => stateManager.doneClicked()
+      case ButtonClicked(component) if component == undoButton => stateManager.undoClicked()
       case MouseClicked(_, point, _, _, _) =>
         canvas.pointOrModel(point) match {
           case Left(boardPoint) => stateManager.pointSelected(boardPoint)

@@ -81,7 +81,14 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
 
   }
   override def undoClicked() = {
-    println("Undo not implemented yet, sorry.")
+    if (madeMove) {
+      for ((model, orig) <- squad.models zip origins) {
+        model.loc = orig
+      }
+      madeMove = false
+      manager.statusText = s"Moving ${squad.name}: choose model for initial move"
+      manager.repaint()
+    }
   }
 }
 
