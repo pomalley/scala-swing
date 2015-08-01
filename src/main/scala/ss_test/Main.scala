@@ -1,13 +1,17 @@
 package ss_test
 
+import java.awt.Color
+
 import controller.StateManager
 import controller.effects.MouseoverEffect
 import controller.states.MoveSquad
-import wh.{Army, Library, Rules}
+import wh.{Army, Library, Rules, Squad}
 
 import scala.swing.BorderPanel.Position._
-import scala.swing._
+import scala.swing.GridBagPanel.{Anchor, Fill}
+import scala.swing.ListView.AbstractRenderer
 import scala.swing.event._
+import scala.swing.{Action, Swing, _}
 
 object Main extends SimpleSwingApplication {
 
@@ -31,15 +35,39 @@ object Main extends SimpleSwingApplication {
       text = "Done"
       borderPainted = true
       enabled = true
-      //tooltip = "Click to throw a dart"
     }
     val undoButton = new Button {
       text = "Undo"
       borderPainted = true
       enabled = true
     }
-    val sideLayout = new BoxPanel(Orientation.Vertical) {
-      contents ++= Seq(doneButton, undoButton)
+    val squadList = new ListView[Squad](army.squads) {
+      val label = new Label()
+      renderer = new AbstractRenderer[Squad, Label](label) {
+        override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: Squad, index: Int): Unit = {
+          label.text = a.toString
+          label.foreground = Color.red
+        }
+      }
+    }
+
+    val sideLayout = new GridBagPanel {
+      border = Swing.EmptyBorder(5, 5, 5, 5)
+      val c = new Constraints
+      c.fill = Fill.Horizontal
+      c.gridx = 0
+      c.gridy = 0
+      c.weighty = 0
+      c.anchor = Anchor.South
+      c.insets = new Insets(0, 0, 5, 5)
+      layout(squadList) = c
+      c.weighty = 1
+      c.gridy += 1
+      layout(doneButton) = c
+      c.weighty = 0
+      c.gridy += 1
+      layout(undoButton) = c
+//      contents ++= Seq(squadList, Swing.HStrut(10), doneButton, undoButton)
     }
 
     ugly.statusBar = new TextField {

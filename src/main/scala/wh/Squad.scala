@@ -25,4 +25,6 @@ class Squad(val modelType: ModelType, val name: String, val army: Army) {
     models = models.filterNot(_ == model)
     model.squad = null
   }
+
+  override def toString = name
 }
