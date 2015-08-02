@@ -58,7 +58,7 @@ class Point(var x: Double, var y: Double) {
   }
 }
 
-class Army {
+class Army (val name: String) {
   var squads: List[Squad] = List()
   def models: List[Model] = squads.foldLeft(List[Model]())((list, squad) => list ++ squad.models)
 }
@@ -70,7 +70,7 @@ object Library {
   )
 
   def defaultArmy: Army = {
-    val army = new Army
+    val army = new Army("Arnie's Army")
 
     val squadA = new Squad(types("A"), "A Squad", army)
     val squadB = new Squad(types("B"), "1st B", army)

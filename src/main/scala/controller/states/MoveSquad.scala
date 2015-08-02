@@ -20,9 +20,8 @@ import scala.util.{Failure, Success}
  * @param manager The manager
  * @param squad The squad
  */
-class MoveSquad(override val manager: StateManager, val squad: Squad) extends State[Action](manager) {
+class MoveSquad(override val manager: StateManager, val squad: Squad, val origins: List[Point]) extends State[List[Point]](manager) {
   var madeMove = false
-  val origins = squad.models.map(_.loc)
   var lastMouseover: Model = null
 
   override def onActivate(): Unit = {
@@ -78,7 +77,8 @@ class MoveSquad(override val manager: StateManager, val squad: Squad) extends St
   }
   override def pointSelected(point: Point) = {}
   override def doneClicked() = {
-
+    // TODO: check for validity
+    complete(squad.models.map(_.loc))
   }
   override def undoClicked() = {
     if (madeMove) {
