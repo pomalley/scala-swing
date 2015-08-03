@@ -7,11 +7,13 @@ import wh.{Model, Point, Squad}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.swing.{Label, ListView}
 
 /**
   * For controlling the state of the UI.
   */
 class StateManager(val canvas: Canvas, val main: Main.type) {
+
    var stateStack: List[InputProcessor] = List()
    def currentState = stateStack.head
    var currentMouseover: Option[MouseoverEffect] = None
@@ -55,6 +57,10 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    def mouseMove(point: Point, model: Option[Model]): Unit = currentState.mouseMove(point, model)
    def doneClicked(): Unit = currentState.doneClicked()
    def undoClicked(): Unit = currentState.undoClicked()
+   def refreshUI(): Unit = {
+     // TODO: implement
+   }
+   def configureSquadList(label: Label, list: ListView[_], isSelected: Boolean, focused: Boolean, a: Squad, index: Int): Unit = currentState.configureSquadList(label, list, isSelected, focused, a, index)
 
    def addEffect[T <: Effect](effect: T): T = {
      // only keep one mouseover at a time

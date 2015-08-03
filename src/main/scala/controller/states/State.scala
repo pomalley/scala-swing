@@ -4,12 +4,25 @@ import controller.StateManager
 import wh.{Model, Point, Squad}
 
 import scala.concurrent.Promise
+import scala.swing.{Label, ListView}
 
 /**
  * Base trait for States. Represents the lifecycle of a state and what inputs it can react to.
  * These methods are how the state transforms the UI to accomplish its goal.
  */
 trait InputProcessor {
+
+  /**
+   * Give the current state an opportunity to customize how the squad list is displayed by modifying the label parameter.
+   * @param label the label to modify
+   * @param list the complete list
+   * @param isSelected whether it's selected
+   * @param focused whether it's focused
+   * @param squad the squad
+   * @param index index in the list
+   */
+  def configureSquadList(label: Label, list: ListView[_], isSelected: Boolean, focused: Boolean, squad: Squad, index: Int): Unit = {}
+
   /**
    * Called when user selects a squad. Currently unimplemented.
    * @param squad the squad the user selects

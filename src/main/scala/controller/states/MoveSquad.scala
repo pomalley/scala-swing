@@ -33,7 +33,8 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
     if (squad contains model) {
       if (!madeMove) {
         val effect = manager.addEffect(new ModelSelection(model))
-        manager.pushState(new GetMoveFor(manager, model)).onComplete {
+        val origin = origins(squad.models.indexOf(model))
+        manager.pushState(new GetMoveFor(manager, model, Some(origin))).onComplete {
           case Success(opt) =>
             opt match {
               case Some(point) =>
@@ -67,7 +68,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
     }
   }
   override def mouseMove(point: Point, model: Option[Model]): Unit = {
-    if (model.nonEmpty && model.get != lastMouseover) {
+    if (model.nonEmpty && model.get != lastMouseover && squad.contains(model.get)) {
       manager.addEffect(new ModelMouseover(model.get))
       lastMouseover = model.get
     } else if (model.isEmpty && lastMouseover != null) {

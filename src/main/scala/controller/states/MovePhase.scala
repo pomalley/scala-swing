@@ -1,9 +1,14 @@
 package controller.states
 
+import java.awt.Font
+
 import controller.StateManager
+import controller.effects.SquadMouseover
 import wh.{Squad, Point, Model, Army}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
+import scala.swing.{ListView, Label}
 import scala.util.{Failure, Success}
 
 /**
@@ -12,6 +17,8 @@ import scala.util.{Failure, Success}
 class MovePhase(override val manager: StateManager, val army: Army) extends State[MoveResults](manager) {
   val originalPositions: Map[Model, Point] = army.models.map(m => m -> m.loc).toMap
   val finalPositions: mutable.Map[Model, Point] = mutable.Map()
+  var movedSquads: Set[Squad] = Set()
+
   /**
    * Called when user selects a squad. Currently unimplemented.
    * @param squad the squad the user selects
@@ -28,7 +35,33 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
     manager.pushState(new MoveSquad(manager, squad, origins)).onComplete {
       case Success(locs) =>
         locs.zip(squad.models).foreach{ case (p: Point, m: Model) => finalPositions(m) = p }
+        movedSquads += squad
       case Failure(t) =>
+        squad.models.foreach(m => m.loc = originalPositions(m))
+        movedSquads -= squad
+    }
+  }
+
+
+  /**
+   * Give the current state an opportunity to customize how the squad list is displayed by modifying the label parameter.
+   * @param label the label to modify
+   * @param list the complete list
+   * @param isSelected whether it's selected
+   * @param focused whether it's focused
+   * @param squad the squad
+   * @param index index in the list
+   */
+  override def configureSquadList(label: Label,
+                                  list: ListView[_],
+                                  isSelected: Boolean,
+                                  focused: Boolean,
+                                  squad: Squad,
+                                  index: Int): Unit = {
+    if (movedSquads.contains(squad)) {
+      label.font = label.font.deriveFont(Font.PLAIN)
+    } else {
+      label.font = label.font.deriveFont(Font.BOLD)
     }
   }
 
@@ -53,7 +86,12 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
    * @param point the location of the mouse
    * @param model the model the mouse is over, if any
    */
-  override def mouseMove(point: Point, model: Option[Model]): Unit = {}
+  override def mouseMove(point: Point, model: Option[Model]): Unit = {
+    model.map(new SquadMouseover(_)) match {
+      case Some(effect) => manager.addEffect(effect)
+      case None => manager.removeMouseover()
+    }
+  }
 
   override def doneClicked(): Unit = {}
 }

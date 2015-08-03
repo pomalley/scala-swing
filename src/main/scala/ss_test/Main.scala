@@ -4,7 +4,7 @@ import java.awt.Color
 
 import controller.StateManager
 import controller.effects.MouseoverEffect
-import controller.states.MoveSquad
+import controller.states.{MovePhase, MoveSquad}
 import wh.{Army, Library, Rules, Squad}
 
 import scala.swing.BorderPanel.Position._
@@ -21,9 +21,21 @@ object Main extends SimpleSwingApplication {
   val ugly = this
 
   Rules.armyA = army
-  Rules.armyB = new Army()
+  Rules.armyB = new Army("Other Army")
 
   def top = new MainFrame { // top is a required method
+
+    val canvas = new Canvas(ugly) {
+      preferredSize = new Dimension(100, 100)
+    }
+
+    ugly.statusBar = new TextField {
+      columns = 10
+    }
+
+    val stateManager = new StateManager(canvas, ugly)
+    stateManager.pushState(new MovePhase(stateManager, army))
+
     title = "A Sample Scala Swing GUI"
 
     // declare Components here
@@ -47,6 +59,7 @@ object Main extends SimpleSwingApplication {
         override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: Squad, index: Int): Unit = {
           label.text = a.toString
           label.foreground = Color.red
+          stateManager.configureSquadList(label, list, isSelected, focused, a, index)
         }
       }
     }
@@ -70,13 +83,6 @@ object Main extends SimpleSwingApplication {
 //      contents ++= Seq(squadList, Swing.HStrut(10), doneButton, undoButton)
     }
 
-    ugly.statusBar = new TextField {
-      columns = 10
-    }
-    val canvas = new Canvas(ugly) {
-      preferredSize = new Dimension(100, 100)
-    }
-
     // choose a top-level Panel and put components in it
     // Components may include other Panels
     contents = new BorderPanel {
@@ -93,9 +99,6 @@ object Main extends SimpleSwingApplication {
         })
       }
     }
-
-    val stateManager = new StateManager(canvas, ugly)
-    stateManager.pushState(new MoveSquad(stateManager, army.squads.head))
 
     // specify which Components produce events of interest
     listenTo(doneButton)

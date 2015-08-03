@@ -62,5 +62,12 @@ class MovementLine (override val model: Model, val loc: Point, val valid: Boolea
     g.fillOval((loc.x*ppi).toInt - radius, (loc.y*ppi).toInt - radius, radius*2, radius*2)
     g.drawLine((originLoc.x*ppi).toInt, (originLoc.y*ppi).toInt, (loc.x*ppi).toInt, (loc.y*ppi).toInt)
   }
+}
 
+class SquadMouseover (override val model: Model) extends ModelMouseover(model) {
+  val subeffects = model.squad.models.map(new ModelMouseover(_))
+
+  override def paint(g: Graphics2D, canvas: Canvas): Unit = {
+    subeffects.foreach(_.paint(g, canvas))
+  }
 }
