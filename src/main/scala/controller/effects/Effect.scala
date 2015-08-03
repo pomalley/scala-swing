@@ -42,9 +42,9 @@ class ModelInvalidPosition (override val model: Model) extends ModelEffect(model
   override val effectClass = Information
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
-    g.setColor(new Color(1, 0, 0))
-    val radius: Int = (model.modelType.size * canvas.ppi / 2.0 * 1.2).toInt
-    g.drawOval((model.loc.x * canvas.ppi).toInt - radius, (model.loc.y * canvas.ppi).toInt - radius, radius*2, radius*2)
+    g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.5f))
+    val radius: Int = (model.modelType.size * canvas.ppi / 2.0 * 1.1).toInt
+    g.fillOval((model.loc.x * canvas.ppi).toInt - radius, (model.loc.y * canvas.ppi).toInt - radius, radius*2, radius*2)
   }
 }
 

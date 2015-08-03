@@ -103,7 +103,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
     val expiredEffects = invalidEffects.filter(ef => Rules.validPosition(ef.model))
     expiredEffects.foreach(manager.removeEffect)
     invalidEffects --= expiredEffects
-    val newEffects = squad.models.filterNot(Rules.validPosition).map(new ModelInvalidPosition(_))
+    val newEffects = squad.models.filterNot(m => Rules.validPosition(m) || invalidEffects.map(_.model).contains(m)).map(new ModelInvalidPosition(_))
     newEffects.foreach(manager.addEffect)
     invalidEffects ++= newEffects
   }
