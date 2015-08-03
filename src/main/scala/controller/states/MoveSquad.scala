@@ -85,6 +85,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
   override def pointSelected(point: Point) = {}
   override def doneClicked() = {
     // TODO: check for validity
+    invalidEffects.foreach(manager.removeEffect)
     complete(squad.models.map(_.loc))
   }
   override def undoClicked() = {

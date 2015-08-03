@@ -55,8 +55,8 @@ object Rules {
       return false
     }
     // cannot overlap any other model
-    if (!armyA.models.forall(other => other == model || !other.overlaps(model))
-      && !armyB.models.forall(other => other == model || !other.overlaps(model))) {
+    if (armyA.models.exists(other => other != model && other.overlaps(model))
+      || armyB.models.exists(other => other != model && other.overlaps(model))) {
       return false
     }
     true
