@@ -43,4 +43,22 @@ object Rules {
     }
     None
   }
+
+  /**
+   * Whether a model's current position is OK.
+   * @param model the model
+   * @return validity
+   */
+  def validPosition(model: Model): Boolean = {
+    // must be w/in 1 cm of another in the squad
+    if (model.squad.models.length > 1 && !model.squad.models.exists(other => other != model && other.modelDistance(model) <= squadCoherenceDistance)) {
+      return false
+    }
+    // cannot overlap any other model
+    if (!armyA.models.forall(other => other == model || !other.overlaps(model))
+      && !armyB.models.forall(other => other == model || !other.overlaps(model))) {
+      return false
+    }
+    true
+  }
 }

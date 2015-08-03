@@ -1,7 +1,7 @@
 package controller.states
 
 import controller.StateManager
-import controller.effects.{MovementLine, ModelMouseover, ModelSelection}
+import controller.effects.{ModelInvalidPosition, MovementLine, ModelMouseover, ModelSelection}
 import wh.{Model, Point, Rules, Squad}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,9 +23,11 @@ import scala.util.{Failure, Success}
 class MoveSquad(override val manager: StateManager, val squad: Squad, val origins: List[Point]) extends State[List[Point]](manager) {
   var madeMove = false
   var lastMouseover: Model = null
+  var invalidEffects: Set[ModelInvalidPosition] = Set()
 
   override def onActivate(): Unit = {
     manager.statusText = s"Moving ${squad.name}: choose model for initial move"
+    updateInvalidEffects()
   }
 
   override def squadSelected(squad: Squad) = {}
@@ -44,8 +46,10 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
                 manager.statusText = s"Moving ${squad.name}: choose model to tidy"
               case None =>
             }
+            updateInvalidEffects()
             manager.removeEffect(effect)
           case Failure(t) =>
+            updateInvalidEffects()
             manager.removeEffect(effect)
         }
       } else {
@@ -60,8 +64,10 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
                 manager.statusText = s"Moving ${squad.name}: choose model to tidy"
               case None =>
             }
+            updateInvalidEffects()
             manager.removeEffect(effect)
           case Failure(t) =>
+            updateInvalidEffects()
             manager.removeEffect(effect)
         }
       }
@@ -90,6 +96,15 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
       manager.statusText = s"Moving ${squad.name}: choose model for initial move"
       manager.repaint()
     }
+  }
+  
+  def updateInvalidEffects(): Unit = {
+    val expiredEffects = invalidEffects.filter(ef => Rules.validPosition(ef.model))
+    expiredEffects.foreach(manager.removeEffect)
+    invalidEffects --= expiredEffects
+    val newEffects = squad.models.filterNot(Rules.validPosition).map(new ModelInvalidPosition(_))
+    newEffects.foreach(manager.addEffect)
+    invalidEffects ++= newEffects
   }
 }
 

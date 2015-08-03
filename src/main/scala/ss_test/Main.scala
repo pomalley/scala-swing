@@ -1,10 +1,8 @@
 package ss_test
 
-import java.awt.Color
-
 import controller.StateManager
 import controller.effects.MouseoverEffect
-import controller.states.{MovePhase, MoveSquad}
+import controller.states.MovePhase
 import wh.{Army, Library, Rules, Squad}
 
 import scala.swing.BorderPanel.Position._
@@ -17,6 +15,7 @@ object Main extends SimpleSwingApplication {
 
   val army: Army = Library.defaultArmy
   var statusBar: TextField = _
+  var squadList: ListView[Squad] = _
 
   val ugly = this
 
@@ -29,7 +28,7 @@ object Main extends SimpleSwingApplication {
       preferredSize = new Dimension(100, 100)
     }
 
-    ugly.statusBar = new TextField {
+    statusBar = new TextField {
       columns = 10
     }
 
@@ -53,12 +52,11 @@ object Main extends SimpleSwingApplication {
       borderPainted = true
       enabled = true
     }
-    val squadList = new ListView[Squad](army.squads) {
+    squadList = new ListView[Squad](army.squads) {
       val label = new Label()
       renderer = new AbstractRenderer[Squad, Label](label) {
         override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: Squad, index: Int): Unit = {
           label.text = a.toString
-          label.foreground = Color.red
           stateManager.configureSquadList(label, list, isSelected, focused, a, index)
         }
       }

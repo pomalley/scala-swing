@@ -1,10 +1,10 @@
 package controller.states
 
-import java.awt.Font
+import java.awt.{Color, Font}
 
 import controller.StateManager
 import controller.effects.SquadMouseover
-import wh.{Squad, Point, Model, Army}
+import wh._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
@@ -36,9 +36,11 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
       case Success(locs) =>
         locs.zip(squad.models).foreach{ case (p: Point, m: Model) => finalPositions(m) = p }
         movedSquads += squad
+        manager.refreshUI()
       case Failure(t) =>
         squad.models.foreach(m => m.loc = originalPositions(m))
         movedSquads -= squad
+        manager.refreshUI()
     }
   }
 
@@ -58,6 +60,11 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
                                   focused: Boolean,
                                   squad: Squad,
                                   index: Int): Unit = {
+    if (!squad.models.iterator.map(Rules.validPosition).forall(x => x)) {
+      label.foreground = Color.RED
+    } else {
+      label.foreground = Color.BLACK
+    }
     if (movedSquads.contains(squad)) {
       label.font = label.font.deriveFont(Font.PLAIN)
     } else {

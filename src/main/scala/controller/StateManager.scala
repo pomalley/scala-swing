@@ -58,9 +58,11 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    def doneClicked(): Unit = currentState.doneClicked()
    def undoClicked(): Unit = currentState.undoClicked()
    def refreshUI(): Unit = {
-     // TODO: implement
+     main.squadList.repaint()
    }
-   def configureSquadList(label: Label, list: ListView[_], isSelected: Boolean, focused: Boolean, a: Squad, index: Int): Unit = currentState.configureSquadList(label, list, isSelected, focused, a, index)
+   def configureSquadList(label: Label, list: ListView[_], isSelected: Boolean, focused: Boolean, squad: Squad, index: Int): Unit = {
+     stateStack.reverseIterator.foreach(_.configureSquadList(label, list, isSelected, focused, squad, index))
+   }
 
    def addEffect[T <: Effect](effect: T): T = {
      // only keep one mouseover at a time

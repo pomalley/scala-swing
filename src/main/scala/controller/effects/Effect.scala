@@ -11,6 +11,7 @@ import scala.swing.Color
 sealed abstract class EffectClass
 case object Selection extends EffectClass
 case object Mouseover extends EffectClass
+case object Information extends EffectClass
 
 /**
  * Used to add graphical effects to objects. e.g. selection circles, etc.
@@ -25,9 +26,9 @@ trait MouseoverEffect extends Effect {
   override val effectClass = Mouseover
 }
 
-abstract class ModelEffect(val mode: Model) extends Effect
+abstract class ModelEffect(val model: Model) extends Effect
 
-class ModelSelection (val model: Model) extends ModelEffect(model) {
+class ModelSelection (override val model: Model) extends ModelEffect(model) {
   override val effectClass = Selection
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
@@ -37,7 +38,17 @@ class ModelSelection (val model: Model) extends ModelEffect(model) {
   }
 }
 
-class ModelMouseover (val model: Model) extends ModelEffect(model) with MouseoverEffect {
+class ModelInvalidPosition (override val model: Model) extends ModelEffect(model) {
+  override val effectClass = Information
+
+  override def paint(g: Graphics2D, canvas: Canvas): Unit = {
+    g.setColor(new Color(1, 0, 0))
+    val radius: Int = (model.modelType.size * canvas.ppi / 2.0 * 1.2).toInt
+    g.drawOval((model.loc.x * canvas.ppi).toInt - radius, (model.loc.y * canvas.ppi).toInt - radius, radius*2, radius*2)
+  }
+}
+
+class ModelMouseover (override val model: Model) extends ModelEffect(model) with MouseoverEffect {
   override val source = model
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
