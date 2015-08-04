@@ -37,10 +37,12 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
         locs.zip(squad.models).foreach{ case (p: Point, m: Model) => finalPositions(m) = p }
         movedSquads += squad
         manager.refreshUI()
+        checkCompleteness()
       case Failure(t) =>
         squad.models.foreach(m => m.loc = originalPositions(m))
         movedSquads -= squad
         manager.refreshUI()
+        checkCompleteness()
     }
   }
 
@@ -78,6 +80,7 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
    */
   override def onActivate(): Unit = {
     manager.statusText = s"Move phase for army ${army.name}"
+    checkCompleteness()
   }
 
   /**
@@ -101,6 +104,14 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
   }
 
   override def doneClicked(): Unit = {}
+
+  def checkCompleteness(): Unit = {
+    if (army.models.forall(Rules.validPosition)) {
+      manager.updateDoneButton(enabled = true, "End move phase")
+    } else {
+      manager.updateDoneButton(enabled = false, "Not all models are in valid positions")
+    }
+  }
 }
 
 class MoveResults(val originalPositions: Map[Model, Point], val finalPositions: Map[Model, Point])

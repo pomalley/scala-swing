@@ -84,11 +84,16 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
      canvas.effects = canvas.effects.filterNot(effects.contains)
      canvas.repaint()
    }
-  def removeMouseover(): Unit = {
-     removeEffects(currentMouseover.toList)
-  }
+   def removeMouseover(): Unit = {
+      removeEffects(currentMouseover.toList)
+   }
 
    def statusText: String = main.statusBar.text
    def statusText_=(s: String) = main.statusBar.text_=(s)
+
+   def updateDoneButton(enabled: Boolean = true, tooltip: String = null): Unit = {
+     main.doneButton.enabled = enabled
+     main.doneButton.tooltip = tooltip
+   }
 
  }

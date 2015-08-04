@@ -16,6 +16,7 @@ object Main extends SimpleSwingApplication {
   val army: Army = Library.defaultArmy
   var statusBar: TextField = _
   var squadList: ListView[Squad] = _
+  var doneButton: Button = _
 
   val ugly = this
 
@@ -31,6 +32,11 @@ object Main extends SimpleSwingApplication {
     statusBar = new TextField {
       columns = 10
     }
+    doneButton = new Button {
+      text = "Done"
+      borderPainted = true
+      enabled = true
+    }
 
     val stateManager = new StateManager(canvas, ugly)
     stateManager.pushState(new MovePhase(stateManager, army))
@@ -41,11 +47,6 @@ object Main extends SimpleSwingApplication {
     val topLabel = new Label {
       text = "This is the thing."
       font = new Font("Ariel", java.awt.Font.ITALIC, 24)
-    }
-    val doneButton = new Button {
-      text = "Done"
-      borderPainted = true
-      enabled = true
     }
     val undoButton = new Button {
       text = "Undo"

@@ -27,6 +27,7 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
 
   override def onActivate(): Unit = {
     manager.statusText = s"Moving ${squad.name}: choose model for initial move"
+    manager.updateDoneButton(enabled = true)
     updateInvalidEffects()
   }
 
