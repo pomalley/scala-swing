@@ -8,8 +8,8 @@ import wh.{Army, Library, Rules, Squad}
 import scala.swing.BorderPanel.Position._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.AbstractRenderer
+import scala.swing._
 import scala.swing.event._
-import scala.swing.{Action, Swing, _}
 
 object Main extends SimpleSwingApplication {
 
@@ -17,6 +17,25 @@ object Main extends SimpleSwingApplication {
   var statusBar: TextField = _
   var squadList: ListView[Squad] = _
   var doneButton: Button = _
+  val sideAdderLayout = new BoxPanel(Orientation.Vertical)
+  val sideLayout = new GridBagPanel {
+    border = Swing.EmptyBorder(5, 5, 5, 5)
+    val c = new Constraints
+    c.fill = Fill.Horizontal
+    c.gridx = 0
+    c.gridy = 0
+    c.weighty = 0
+    c.anchor = Anchor.South
+    c.insets = new Insets(0, 0, 5, 5)
+  }
+
+  def addSideItem(component: Component): Unit = {
+    sideLayout.layout(component) = sideLayout.c
+    sideLayout.c.gridy += 1
+  }
+  def addSideItem2(component: Component): Unit = {
+    sideAdderLayout.contents += component
+  }
 
   val ugly = this
 
@@ -63,24 +82,10 @@ object Main extends SimpleSwingApplication {
       }
     }
 
-    val sideLayout = new GridBagPanel {
-      border = Swing.EmptyBorder(5, 5, 5, 5)
-      val c = new Constraints
-      c.fill = Fill.Horizontal
-      c.gridx = 0
-      c.gridy = 0
-      c.weighty = 0
-      c.anchor = Anchor.South
-      c.insets = new Insets(0, 0, 5, 5)
-      layout(squadList) = c
-      c.weighty = 1
-      c.gridy += 1
-      layout(doneButton) = c
-      c.weighty = 0
-      c.gridy += 1
-      layout(undoButton) = c
-//      contents ++= Seq(squadList, Swing.HStrut(10), doneButton, undoButton)
-    }
+    ugly.addSideItem(squadList)
+    ugly.addSideItem(sideAdderLayout)
+    ugly.addSideItem(doneButton)
+    ugly.addSideItem(undoButton)
 
     // choose a top-level Panel and put components in it
     // Components may include other Panels

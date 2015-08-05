@@ -5,9 +5,10 @@ import controller.states.{InputProcessor, State}
 import ss_test.{Canvas, Main}
 import wh.{Model, Point, Squad}
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.swing.{Label, ListView}
+import scala.swing.{Action, Button, Label, ListView}
 
 /**
   * For controlling the state of the UI.
@@ -95,5 +96,23 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
      main.doneButton.enabled = enabled
      main.doneButton.tooltip = tooltip
    }
+
+  var buttons: mutable.Map[String, Button] = mutable.Map()
+  def addButton(name: String, callback: => Unit, toggles: Boolean = false): Unit = {
+    if (buttons.contains(name)) {
+      removeButton(name)
+    }
+    buttons(name) = new Button(Action(name){ callback })
+    main.addSideItem2(buttons(name))
+    main.sideLayout.repaint()
+    println("added button")
+
+  }
+
+  def removeButton(name: String): Unit = {
+    if (buttons.contains(name)) {
+      buttons.remove(name)
+    }
+  }
 
  }
