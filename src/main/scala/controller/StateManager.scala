@@ -98,15 +98,14 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    }
 
   var buttons: mutable.Map[String, Button] = mutable.Map()
-  def addButton(name: String, callback: => Unit, toggles: Boolean = false): Unit = {
+  def addButton(name: String, callback: => Unit, toggles: Boolean = false, tooltip: String = null): Unit = {
     if (buttons.contains(name)) {
+      main.removeSideItem(buttons(name))
       removeButton(name)
     }
     buttons(name) = new Button(Action(name){ callback })
-    main.addSideItem2(buttons(name))
-    main.sideLayout.repaint()
-    println("added button")
-
+    buttons(name).tooltip = tooltip
+    main.addSideItem(buttons(name))
   }
 
   def removeButton(name: String): Unit = {

@@ -1,40 +1,54 @@
 package ss_test
 
+import scala.language.reflectiveCalls
+
 import controller.StateManager
 import controller.effects.MouseoverEffect
 import controller.states.MovePhase
 import wh.{Army, Library, Rules, Squad}
 
 import scala.swing.BorderPanel.Position._
-import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.AbstractRenderer
-import scala.swing._
+import scala.swing.{Swing, _}
 import scala.swing.event._
 
 object Main extends SimpleSwingApplication {
 
   val army: Army = Library.defaultArmy
-  var statusBar: TextField = _
+  val statusBar = new TextField {
+    columns = 10
+  }
   var squadList: ListView[Squad] = _
-  var doneButton: Button = _
-  val sideAdderLayout = new BoxPanel(Orientation.Vertical)
-  val sideLayout = new GridBagPanel {
+  val undoButton = new Button {
+    text = "Undo"
+    xLayoutAlignment = 0.5
+    maximumSize = new Dimension(Int.MaxValue, 20)
+  }
+  val doneButton = new Button {
+    text = "Done"
+    xLayoutAlignment = 0.5
+    maximumSize = new Dimension(Int.MaxValue, 20)
+  }
+  val sideLayout = new BoxPanel(Orientation.Vertical) {
     border = Swing.EmptyBorder(5, 5, 5, 5)
-    val c = new Constraints
-    c.fill = Fill.Horizontal
-    c.gridx = 0
-    c.gridy = 0
-    c.weighty = 0
-    c.anchor = Anchor.South
-    c.insets = new Insets(0, 0, 5, 5)
+    contents += Swing.VGlue
+    contents += undoButton
+    contents += Swing.VStrut(5)
+    contents += doneButton
+    var next: Int = 0
   }
-
   def addSideItem(component: Component): Unit = {
-    sideLayout.layout(component) = sideLayout.c
-    sideLayout.c.gridy += 1
+    component.xLayoutAlignment = 0.5
+    component.maximumSize = new Dimension(Int.MaxValue, 20)
+    sideLayout.contents.insert(sideLayout.next, Swing.VStrut(5), component)
+    sideLayout.contents.insert(sideLayout.next, component)
+    sideLayout.revalidate()
+    sideLayout.next += 2
   }
-  def addSideItem2(component: Component): Unit = {
-    sideAdderLayout.contents += component
+  def removeSideItem(component: Component) = {
+    val i = sideLayout.contents.indexOf(component)
+    sideLayout.contents.remove(i-1, 2)
+    sideLayout.next -= 2
   }
 
   val ugly = this
@@ -43,49 +57,34 @@ object Main extends SimpleSwingApplication {
   Rules.armyB = new Army("Other Army")
 
   def top = new MainFrame { // top is a required method
+    title = "A Sample Scala Swing GUI"
 
     val canvas = new Canvas(ugly) {
       preferredSize = new Dimension(100, 100)
     }
 
-    statusBar = new TextField {
-      columns = 10
-    }
-    doneButton = new Button {
-      text = "Done"
-      borderPainted = true
-      enabled = true
+    val topLabel = new Label {
+      text = "This is the thing."
+      font = new Font("Ariel", java.awt.Font.ITALIC, 24)
     }
 
     val stateManager = new StateManager(canvas, ugly)
     stateManager.pushState(new MovePhase(stateManager, army))
 
-    title = "A Sample Scala Swing GUI"
-
-    // declare Components here
-    val topLabel = new Label {
-      text = "This is the thing."
-      font = new Font("Ariel", java.awt.Font.ITALIC, 24)
-    }
-    val undoButton = new Button {
-      text = "Undo"
-      borderPainted = true
-      enabled = true
-    }
     squadList = new ListView[Squad](army.squads) {
       val label = new Label()
       renderer = new AbstractRenderer[Squad, Label](label) {
         override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: Squad, index: Int): Unit = {
           label.text = a.toString
+          label.preferredSize = new Dimension(100, 20)
+          label.border = Swing.BeveledBorder(Swing.Raised, new Color(204, 153, 0), new Color(102, 51, 0))
           stateManager.configureSquadList(label, list, isSelected, focused, a, index)
         }
       }
     }
 
     ugly.addSideItem(squadList)
-    ugly.addSideItem(sideAdderLayout)
-    ugly.addSideItem(doneButton)
-    ugly.addSideItem(undoButton)
+    ugly.addSideItem(Swing.VStrut(5))
 
     // choose a top-level Panel and put components in it
     // Components may include other Panels
