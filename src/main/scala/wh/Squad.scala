@@ -26,5 +26,5 @@ class Squad(val modelType: ModelType, val name: String, val army: Army) {
     model.squad = null
   }
 
-  override def toString = name
+  override def toString: String = name
 }

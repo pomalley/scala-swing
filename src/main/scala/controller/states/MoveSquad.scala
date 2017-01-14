@@ -22,18 +22,18 @@ import scala.util.{Failure, Success}
  */
 class MoveSquad(override val manager: StateManager, val squad: Squad, val origins: List[Point]) extends State[List[Point]](manager) {
   var madeMove = false
-  var lastMouseover: Model = null
+  var lastMouseover: Model = _
   var invalidEffects: Set[ModelInvalidPosition] = Set()
 
   override def onActivate(): Unit = {
     manager.statusText = s"Moving ${squad.name}: choose model for initial move"
-    manager.updateDoneButton(enabled = true)
+    manager.updateDoneButton()
     manager.addButton("Run", { println("wut") }, tooltip = "Order this unit to run")
     updateInvalidEffects()
   }
 
-  override def squadSelected(squad: Squad) = {}
-  override def modelSelected(model: Model) = {
+  override def squadSelected(squad: Squad): Unit = {}
+  override def modelSelected(model: Model): Unit = {
     if (squad contains model) {
       if (!madeMove) {
         val effect = manager.addEffect(new ModelSelection(model))
@@ -84,13 +84,13 @@ class MoveSquad(override val manager: StateManager, val squad: Squad, val origin
       lastMouseover = null
     }
   }
-  override def pointSelected(point: Point) = {}
-  override def doneClicked() = {
+  override def pointSelected(point: Point): Unit = {}
+  override def doneClicked(): Unit = {
     // TODO: check for validity
     invalidEffects.foreach(manager.removeEffect)
     complete(squad.models.map(_.loc))
   }
-  override def undoClicked() = {
+  override def undoClicked(): Unit = {
     if (madeMove) {
       for ((model, orig) <- squad.models zip origins) {
         model.loc = orig
@@ -121,7 +121,7 @@ class GetMoveFor(override val manager: StateManager, val model: Model, val origi
   override def onActivate(): Unit = {
     manager.statusText = baseMsg
   }
-  override def pointSelected(point: Point) = {
+  override def pointSelected(point: Point): Unit = {
     moveRule(point) match {
       case Some(reason) => println(reason)
       case None => complete(Some(point))

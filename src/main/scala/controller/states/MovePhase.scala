@@ -38,7 +38,7 @@ class MovePhase(override val manager: StateManager, val army: Army) extends Stat
         movedSquads += squad
         manager.refreshUI()
         checkCompleteness()
-      case Failure(t) =>
+      case Failure(_) =>
         squad.models.foreach(m => m.loc = originalPositions(m))
         movedSquads -= squad
         manager.refreshUI()

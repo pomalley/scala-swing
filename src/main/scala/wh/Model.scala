@@ -35,7 +35,7 @@ class Model (val modelType: ModelType, var loc: Point) {
 
   override def toString = s"${modelType.name} at ${loc.toString}"
 
-  var squad: Squad = null
+  var squad: Squad = _
   def sameSquad(other: Model): Boolean = squad != null && squad.models.contains(other)
 }
 
@@ -64,7 +64,7 @@ class Army (val name: String) {
 }
 
 object Library {
-  val types = mutable.HashMap[String, ModelType](
+  val types: mutable.HashMap[String, ModelType] = mutable.HashMap[String, ModelType](
     "A" -> new ModelType("A", 1.0, 5.0, Color.GREEN),
     "B" -> new ModelType("B", 0.8, 6.0, Color.CYAN)
   )

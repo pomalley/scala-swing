@@ -16,7 +16,7 @@ import scala.swing.{Action, Button, Label, ListView}
 class StateManager(val canvas: Canvas, val main: Main.type) {
 
    var stateStack: List[InputProcessor] = List()
-   def currentState = stateStack.head
+   def currentState: InputProcessor = stateStack.head
    var currentMouseover: Option[MouseoverEffect] = None
 
   /**
@@ -50,7 +50,7 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
      poppedState
    }
 
-   def repaint() = canvas.repaint()
+   def repaint(): Unit = canvas.repaint()
 
    def squadSelected(squad: Squad): Unit = currentState.squadSelected(squad)
    def modelSelected(model: Model): Unit = currentState.modelSelected(model)
@@ -90,7 +90,7 @@ class StateManager(val canvas: Canvas, val main: Main.type) {
    }
 
    def statusText: String = main.statusBar.text
-   def statusText_=(s: String) = main.statusBar.text_=(s)
+   def statusText_=(s: String): Unit = main.statusBar.text_=(s)
 
    def updateDoneButton(enabled: Boolean = true, tooltip: String = null): Unit = {
      main.doneButton.enabled = enabled

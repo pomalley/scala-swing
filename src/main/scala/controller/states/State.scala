@@ -63,7 +63,7 @@ trait InputProcessor {
  * @tparam Result The type of result we promise.
  */
 abstract class State[Result] (val manager: StateManager) extends InputProcessor {
-  val promise = Promise[Result]()
+  val promise: Promise[Result] = Promise[Result]()
 
   def complete(result: Result): Unit = {
     promise.success(result)

@@ -45,13 +45,13 @@ object Main extends SimpleSwingApplication {
     sideLayout.revalidate()
     sideLayout.next += 2
   }
-  def removeSideItem(component: Component) = {
+  def removeSideItem(component: Component): Unit = {
     val i = sideLayout.contents.indexOf(component)
     sideLayout.contents.remove(i-1, 2)
     sideLayout.next -= 2
   }
 
-  val ugly = this
+  val ugly: Main.type = this
 
   Rules.armyA = army
   Rules.armyB = new Army("Other Army")

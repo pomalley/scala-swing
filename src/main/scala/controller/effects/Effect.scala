@@ -49,7 +49,7 @@ class ModelInvalidPosition (override val model: Model) extends ModelEffect(model
 }
 
 class ModelMouseover (override val model: Model) extends ModelEffect(model) with MouseoverEffect {
-  override val source = model
+  override val source: Model = model
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
     g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.4f))
@@ -61,7 +61,7 @@ class ModelMouseover (override val model: Model) extends ModelEffect(model) with
 class MovementLine (override val model: Model, val loc: Point, val valid: Boolean, val origin: Option[Point] = None)
   extends ModelMouseover(model) {
 
-  val originLoc = origin.getOrElse(model.loc)
+  val originLoc: Point = origin.getOrElse(model.loc)
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
     val ppi = canvas.ppi
@@ -76,7 +76,7 @@ class MovementLine (override val model: Model, val loc: Point, val valid: Boolea
 }
 
 class SquadMouseover (override val model: Model) extends ModelMouseover(model) {
-  val subeffects = model.squad.models.map(new ModelMouseover(_))
+  val subeffects: List[ModelMouseover] = model.squad.models.map(new ModelMouseover(_))
 
   override def paint(g: Graphics2D, canvas: Canvas): Unit = {
     subeffects.foreach(_.paint(g, canvas))
